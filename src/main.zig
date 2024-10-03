@@ -16,6 +16,48 @@ const map = [8][8]i32{
     [_]i32{ 1, 1, 1, 1, 1, 1, 1, 1 },
 };
 
+pub fn handlePlayerMovement() !void {
+    const pastPlayerPos = playerPos;
+
+    // Rotation
+    if (rl.isKeyDown(rl.KeyboardKey.key_a)) {
+        playerAngle -= 0.1;
+
+        if (playerAngle < 0) {
+            playerAngle += 2 * PI;
+        }
+    }
+    if (rl.isKeyDown(rl.KeyboardKey.key_d)) {
+        playerAngle += 0.1;
+
+        if (playerAngle > 2 * PI) {
+            playerAngle -= 2 * PI;
+        }
+    }
+
+    // Motion
+    if (rl.isKeyDown(rl.KeyboardKey.key_w)) {
+        playerPos.x -= @cos(playerAngle);
+        playerPos.y -= @sin(playerAngle);
+    }
+    if (rl.isKeyDown(rl.KeyboardKey.key_s)) {
+        playerPos.x -= @cos(playerAngle);
+        playerPos.y -= @sin(playerAngle);
+    }
+
+    // Check collisions and undo movement if any collide
+    for (0..8) |x| {
+        for (0..8) |y| {
+            if (map[x][y] == 1) {
+                if (rl.checkCollisionCircleRec(playerPos, 8.0, rl.Rectangle{ .x = @as(f32, @floatFromInt(x * 32)), .y = @as(f32, @floatFromInt(y * 32)), .width = 32, .height = 32 })) {
+                    playerPos = pastPlayerPos;
+                    break;
+                }
+            }
+        }
+    }
+}
+
 pub fn main() anyerror!void {
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -30,46 +72,7 @@ pub fn main() anyerror!void {
 
     // Main game loop
     while (!rl.windowShouldClose()) { // Detect window close button or ESC key
-        // == Player Movement ==
-        const pastPlayerPos = playerPos;
-
-        // Rotation
-        if (rl.isKeyDown(rl.KeyboardKey.key_a)) {
-            playerAngle -= 0.1;
-
-            if (playerAngle < 0) {
-                playerAngle += 2 * PI;
-            }
-        }
-        if (rl.isKeyDown(rl.KeyboardKey.key_d)) {
-            playerAngle += 0.1;
-
-            if (playerAngle > 2 * PI) {
-                playerAngle -= 2 * PI;
-            }
-        }
-
-        // Motion
-        if (rl.isKeyDown(rl.KeyboardKey.key_w)) {
-            playerPos.x -= @cos(playerAngle);
-            playerPos.y -= @sin(playerAngle);
-        }
-        if (rl.isKeyDown(rl.KeyboardKey.key_s)) {
-            playerPos.x -= @cos(playerAngle);
-            playerPos.y -= @sin(playerAngle);
-        }
-
-        // Check collisions and undo movement if any collide
-        for (0..8) |x| {
-            for (0..8) |y| {
-                if (map[x][y] == 1) {
-                    if (rl.checkCollisionCircleRec(playerPos, 8.0, rl.Rectangle{ .x = @as(f32, @floatFromInt(x * 32)), .y = @as(f32, @floatFromInt(y * 32)), .width = 32, .height = 32 })) {
-                        playerPos = pastPlayerPos;
-                        break;
-                    }
-                }
-            }
-        }
+        _ = handlePlayerMovement() catch {};
 
         // == Begin Drawing ==
         rl.beginDrawing();
