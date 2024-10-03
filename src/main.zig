@@ -58,7 +58,7 @@ pub fn main() anyerror!void {
         rl.beginDrawing();
         defer rl.endDrawing();
 
-        rl.clearBackground(rl.Color.white);
+        rl.clearBackground(rl.Color.gray);
 
         // Draw Map
         for (0..8) |x| {
@@ -71,5 +71,6 @@ pub fn main() anyerror!void {
 
         // Draw Player
         rl.drawCircleV(playerPos, 8.0, rl.Color.red);
+        rl.drawLine(@intFromFloat(playerPos.x), @intFromFloat(playerPos.y), @intFromFloat(playerPos.x + 16), @intFromFloat(playerPos.y), rl.Color.yellow); // View angle line
     }
 }
