@@ -28,6 +28,7 @@ pub fn main() anyerror!void {
     // Main game loop
     while (!rl.windowShouldClose()) { // Detect window close button or ESC key
         // Player Movement
+        const pastPlayerPos = playerPos;
         if (rl.isKeyDown(rl.KeyboardKey.key_w)) {
             playerPos.y -= 2;
         }
@@ -39,6 +40,18 @@ pub fn main() anyerror!void {
         }
         if (rl.isKeyDown(rl.KeyboardKey.key_d)) {
             playerPos.x += 2;
+        }
+
+        // Check collisions and undo movement if any collide
+        for (0..8) |x| {
+            for (0..8) |y| {
+                if (map[x][y] == 1) {
+                    if (rl.checkCollisionCircleRec(playerPos, 8.0, rl.Rectangle{ .x = @as(f32, @floatFromInt(x*32)), .y = @as(f32, @floatFromInt(y*32)), .width = 32, .height = 32})) {
+                        playerPos = pastPlayerPos;
+                        break;
+                    }
+                }
+            }
         }
 
         // Begin Drawing
@@ -57,6 +70,6 @@ pub fn main() anyerror!void {
         }
 
         // Draw Player
-        rl.drawCircleV(playerPos, 16.0, rl.Color.red);
+        rl.drawCircleV(playerPos, 8.0, rl.Color.red);
     }
 }
