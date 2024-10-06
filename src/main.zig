@@ -1,4 +1,5 @@
 const rl = @import("raylib");
+const rlm = rl.math;
 
 var playerPos = rl.Vector2{ .x = 100, .y = 100 };
 var playerAngle: f32 = 0.0;
@@ -63,56 +64,30 @@ fn roundToNearestMultiple(value: f32, multiple: f32) f32 {
 }
 
 fn draw3dRays() !void {
-    const rayMaxLength = 8;
-    const rayCount = 1;
+    const viewDistance = 128;
+    const rayStart = playerPos;
+    const rayDirection = rl.Vector2{ .x = -@cos(playerAngle), .y = -@sin(playerAngle) };
+    const rayStep = 0.1;
 
-    const rayAngle = playerAngle;
-    var rayDistance: i32 = 0;
+    const rayDelta = rlm.vector2Scale(rayDirection, rayStep);
 
-    var rayPosition = rl.Vector2{ .x = 0, .y = 0 };
-    var rayOffset = rl.Vector2{ .x = 0, .y = 0 };
+    var rayPosition = rayStart;
+    var rayHit: bool = false;
 
-    // For each ray we travel up to rayMaxLength pixels at the corresponding angle to find a wall
-    for (0..rayCount) |_| {
-        rayDistance = 0;
+    while (rlm.vector2Distance(rayStart, rayPosition) < viewDistance) {
+        rayPosition = rlm.vector2Add(rayPosition, rayDelta);
 
-        const aTan = -1 / @tan(rayAngle);
-
-        // Looking up (less than 180 degrees)
-        if (rayAngle > PI) {
-            rayPosition.y = roundToNearestMultiple(rayPosition.y, 32); // Snap to grid
-            rayPosition.x = (playerPos.y - rayPosition.y) * aTan + playerPos.x; // Distance between ray's position and player's position times aTan + player x position
-            rayOffset.y = -32;
-            rayOffset.x = -rayOffset.y * aTan;
+        const rayMapPosition = rl.Vector2{ .x = rayPosition.x / 32, .y = rayPosition.y / 32 };
+        if (rayMapPosition.x < 8 and rayMapPosition.y < 8 and rayMapPosition.x > 0 and rayMapPosition.y > 0 and map[@intFromFloat(rayMapPosition.x)][@intFromFloat(rayMapPosition.y)] == 1) {
+            rayHit = true;
+            break;
         }
-        // Looking down
-        else if (rayAngle < PI) {
-            rayPosition.y = roundToNearestMultiple(rayPosition.y, 32) + 32; // Snap to grid
-            rayPosition.x = (playerPos.y - rayPosition.y) * aTan + playerPos.x; // Distance between ray's position and player's position times aTan + player x position
-            rayOffset.y = 32;
-            rayOffset.x = -rayOffset.y * aTan;
-        }
-        // Looking directly left or right (can't ever hit a horizontal line so we skip)
-        else if (rayAngle == 0 or rayAngle == PI) {
-            rayPosition.x = playerPos.x;
-            rayPosition.y = playerPos.y;
-            rayDistance = rayMaxLength; // End the ray prematurely
-        }
+    }
 
-        while (rayDistance < 8) {
-            const mapPosition = rl.Vector2{ .x = rayPosition.x / 32, .y = rayPosition.y / 32 };
-
-            if (mapPosition.x < 0 or mapPosition.y < 0 or map[@intFromFloat(mapPosition.x)][@intFromFloat(mapPosition.y)] == 1) {
-                rayDistance = 8; // Wall hiti
-            } else {
-                // Otherwise if no wall hit we simply move the ray forward one block in the grid
-                rayPosition.x += rayOffset.x;
-                rayPosition.y += rayOffset.y;
-                rayDistance += 1;
-            }
-        }
-
-        rl.drawLineV(playerPos, rayPosition, rl.Color.green);
+    if (rayHit) {
+        rl.drawLineV(rayStart, rayPosition, rl.Color.green);
+    } else {
+        rl.drawLineV(rayStart, rayPosition, rl.Color.red);
     }
 }
 
@@ -149,7 +124,7 @@ pub fn main() anyerror!void {
 
         // Draw Player
         rl.drawCircleV(playerPos, 8.0, rl.Color.red);
-        rl.drawLine(@intFromFloat(playerPos.x), @intFromFloat(playerPos.y), @intFromFloat(playerPos.x + @cos(playerAngle) * -8), @intFromFloat(playerPos.y + @sin(playerAngle) * -8), rl.Color.yellow); // View angle line
         _ = draw3dRays() catch {};
+        rl.drawLine(@intFromFloat(playerPos.x), @intFromFloat(playerPos.y), @intFromFloat(playerPos.x + @cos(playerAngle) * -8), @intFromFloat(playerPos.y + @sin(playerAngle) * -8), rl.Color.yellow); // View angle line
     }
 }
