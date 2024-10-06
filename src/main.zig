@@ -79,7 +79,7 @@ fn draw3dRays() !void {
     var rayPosition = rayStart;
     var rayHit: bool = false;
 
-    for (0..fieldOfView) |_| {
+    for (0..fieldOfView) |rayCount| {
         while (rlm.vector2Distance(rayStart, rayPosition) < viewDistance) {
             rayPosition = rlm.vector2Add(rayPosition, rayDelta);
 
@@ -90,11 +90,18 @@ fn draw3dRays() !void {
             }
         }
 
+        // Draw 2D Rays
         if (rayHit) {
             rl.drawLineV(rayStart, rayPosition, rl.Color.green);
         } else {
             rl.drawLineV(rayStart, rayPosition, rl.Color.red);
         }
+
+        // Draw 3D Walls
+        const windowPos = rl.Vector2{ .x = 400, .y = 20 };
+        const lineHeight = (8 * 2000) / rlm.vector2Distance(rayStart, rayPosition); // (Map size * window height) / line distance (to make it so further walls are smaller)
+
+        rl.drawLineEx(rl.Vector2{ .x = @as(f32, @floatFromInt(rayCount)) * 8 + windowPos.x, .y = windowPos.y }, rl.Vector2{ .x = @as(f32, @floatFromInt(rayCount)) * 8 + windowPos.x, .y = windowPos.y + lineHeight }, 8.0, rl.Color.sky_blue);
 
         // Recalculate the ray for the next angle
         viewAngle += ONEDEG;
