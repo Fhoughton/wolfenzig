@@ -101,7 +101,9 @@ fn draw3dRays() !void {
         const windowPos = rl.Vector2{ .x = 400, .y = 20 };
         const lineHeight = (8 * 2000) / rlm.vector2Distance(rayStart, rayPosition); // (Map size * window height) / line distance (to make it so further walls are smaller)
 
-        rl.drawLineEx(rl.Vector2{ .x = @as(f32, @floatFromInt(rayCount)) * 8 + windowPos.x, .y = windowPos.y }, rl.Vector2{ .x = @as(f32, @floatFromInt(rayCount)) * 8 + windowPos.x, .y = windowPos.y + lineHeight }, 8.0, rl.Color.blue);
+        if (rayHit) {
+            rl.drawLineEx(rl.Vector2{ .x = @as(f32, @floatFromInt(rayCount)) * 8 + windowPos.x, .y = windowPos.y }, rl.Vector2{ .x = @as(f32, @floatFromInt(rayCount)) * 8 + windowPos.x, .y = windowPos.y + lineHeight }, 8.0, rl.Color.blue);
+        }
 
         // Recalculate the ray for the next angle
         viewAngle += ONEDEG;
