@@ -115,7 +115,6 @@ fn draw3dRays() !void {
 }
 
 pub fn main() anyerror!void {
-    // Initialization
     const screenWidth = 800;
     const screenHeight = 450;
 
