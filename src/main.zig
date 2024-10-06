@@ -51,7 +51,7 @@ fn handlePlayerMovement() !void {
     for (0..8) |x| {
         for (0..8) |y| {
             if (map[x][y] == 1) {
-                if (rl.checkCollisionCircleRec(playerPos, 8.0, rl.Rectangle{ .x = @as(f32, @floatFromInt(x * 32)), .y = @as(f32, @floatFromInt(y * 32)), .width = 32, .height = 32 })) {
+                if (rl.checkCollisionCircleRec(playerPos, 4.0, rl.Rectangle{ .x = @as(f32, @floatFromInt(x * 32)), .y = @as(f32, @floatFromInt(y * 32)), .width = 32, .height = 32 })) {
                     playerPos = pastPlayerPos;
                     break;
                 }
@@ -144,7 +144,7 @@ pub fn main() anyerror!void {
         }
 
         // Draw Player
-        rl.drawCircleV(playerPos, 8.0, rl.Color.red);
+        rl.drawCircleV(playerPos, 4.0, rl.Color.red);
         _ = draw3dRays() catch {};
         rl.drawLine(@intFromFloat(playerPos.x), @intFromFloat(playerPos.y), @intFromFloat(playerPos.x + @cos(playerAngle) * -8), @intFromFloat(playerPos.y + @sin(playerAngle) * -8), rl.Color.yellow); // View angle line
     }
