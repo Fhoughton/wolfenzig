@@ -5,6 +5,7 @@ var playerPos = rl.Vector2{ .x = 100, .y = 100 };
 var playerAngle: f32 = 0.0;
 
 const PI = 3.1415;
+const ONEDEG = 0.0174533; // One degree in radians
 
 const map = [8][8]i32{
     [_]i32{ 1, 1, 1, 1, 1, 1, 1, 1 },
@@ -42,8 +43,8 @@ fn handlePlayerMovement() !void {
         playerPos.y -= @sin(playerAngle);
     }
     if (rl.isKeyDown(rl.KeyboardKey.key_s)) {
-        playerPos.x -= @cos(playerAngle);
-        playerPos.y -= @sin(playerAngle);
+        playerPos.x += @cos(playerAngle);
+        playerPos.y += @sin(playerAngle);
     }
 
     // Check collisions and undo movement if any collide
@@ -64,30 +65,43 @@ fn roundToNearestMultiple(value: f32, multiple: f32) f32 {
 }
 
 fn draw3dRays() !void {
+    const fieldOfView = 60;
     const viewDistance = 128;
     const rayStart = playerPos;
-    const rayDirection = rl.Vector2{ .x = -@cos(playerAngle), .y = -@sin(playerAngle) };
+
+    var viewAngle: f32 = (-fieldOfView / 2) * ONEDEG;
+    var rayDirection = rl.Vector2{ .x = -@cos(playerAngle + viewAngle), .y = -@sin(playerAngle + viewAngle) };
+
     const rayStep = 0.1;
 
-    const rayDelta = rlm.vector2Scale(rayDirection, rayStep);
+    var rayDelta = rlm.vector2Scale(rayDirection, rayStep);
 
     var rayPosition = rayStart;
     var rayHit: bool = false;
 
-    while (rlm.vector2Distance(rayStart, rayPosition) < viewDistance) {
-        rayPosition = rlm.vector2Add(rayPosition, rayDelta);
+    for (0..fieldOfView) |_| {
+        while (rlm.vector2Distance(rayStart, rayPosition) < viewDistance) {
+            rayPosition = rlm.vector2Add(rayPosition, rayDelta);
 
-        const rayMapPosition = rl.Vector2{ .x = rayPosition.x / 32, .y = rayPosition.y / 32 };
-        if (rayMapPosition.x < 8 and rayMapPosition.y < 8 and rayMapPosition.x > 0 and rayMapPosition.y > 0 and map[@intFromFloat(rayMapPosition.x)][@intFromFloat(rayMapPosition.y)] == 1) {
-            rayHit = true;
-            break;
+            const rayMapPosition = rl.Vector2{ .x = rayPosition.x / 32, .y = rayPosition.y / 32 };
+            if (rayMapPosition.x < 8 and rayMapPosition.y < 8 and rayMapPosition.x > 0 and rayMapPosition.y > 0 and map[@intFromFloat(rayMapPosition.x)][@intFromFloat(rayMapPosition.y)] == 1) {
+                rayHit = true;
+                break;
+            }
         }
-    }
 
-    if (rayHit) {
-        rl.drawLineV(rayStart, rayPosition, rl.Color.green);
-    } else {
-        rl.drawLineV(rayStart, rayPosition, rl.Color.red);
+        if (rayHit) {
+            rl.drawLineV(rayStart, rayPosition, rl.Color.green);
+        } else {
+            rl.drawLineV(rayStart, rayPosition, rl.Color.red);
+        }
+
+        // Recalculate the ray for the next angle
+        viewAngle += ONEDEG;
+        rayPosition = rayStart;
+        rayDirection = rl.Vector2{ .x = -@cos(playerAngle + viewAngle), .y = -@sin(playerAngle + viewAngle) };
+        rayDelta = rlm.vector2Scale(rayDirection, rayStep);
+        rayHit = false;
     }
 }
 
