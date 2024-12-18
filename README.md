@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://github.com/Fhoughton/wolfenzig/blob/master/logo.png">
+    <img src="https://github.com/Fhoughton/wolfenzig/blob/master/logo.png" style="width: 75%;">
 </div>
 
 ![](https://github.com/Fhoughton/wolfenzig/blob/master/demo.gif)
