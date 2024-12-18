@@ -1,4 +1,6 @@
-# WolfenZig
+<div align="center">
+    <img src="https://github.com/Fhoughton/wolfenzig/blob/master/logo.png">
+</div>
 
 ![](https://github.com/Fhoughton/wolfenzig/blob/master/demo.gif)
 
