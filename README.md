@@ -9,7 +9,7 @@ Raycasting is a rendering technique used in classic 2.5D games like [Wolfenstein
 
 ## Features
 
-- Minimalistic implementation (150 lines of code)
+- Minimalist implementation (150 lines of code)
 - Written entirely in Zig, using [Raylib](https://github.com/raysan5/raylib) for rendering
 
 ## Getting Started
